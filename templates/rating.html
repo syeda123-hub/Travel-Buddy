@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Review and Rating Page</title>
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            background-image: url('{{ url_for('static', filename='images/five.jpg') }}');
+            background-size: contain;
+            background-attachment: fixed;
+            background-repeat: repeat;
+            background-position: center;
+            color: #333;
+        }
+        .container {
+            max-width: 700px;
+            margin: 120px auto;
+            padding: 25px;
+            background-color: rgba(255, 255, 255, 0.93);
+            border-radius: 10px;
+            box-shadow: 0 0 12px rgba(0, 0, 0, 0.2);
+        }
+        h1, h2 {
+            text-align: center;
+            color: #222;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        button {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            background-color: #007bff;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        #ratingSection {
+            margin-top: 15px;
+            text-align: center;
+        }
+        .rating span {
+            font-size: 25px;
+            color: #ddd;
+        }
+        .rating .filled {
+            color: gold;
+        }
+        .reviews {
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+            margin-top: 25px;
+        }
+        .review-list {
+            flex: 1;
+            background-color: #f8f8f8;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: inset 0 0 5px rgba(0,0,0,0.1);
+        }
+        .review-list h3 {
+            text-align: center;
+            margin-bottom: 10px;
+            color: #444;
+        }
+        .review-list ul {
+            list-style: none;
+            padding: 0;
+        }
+        .review-list li {
+            margin: 6px 0;
+            padding: 8px;
+            background: white;
+            border-radius: 4px;
+            box-shadow: 0 0 3px rgba(0,0,0,0.05);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Review and Rating Finder</h1>
+
+        <form method="post" action="/combined">
+            <div class="form-group">
+                <label for="city">Enter City Name:</label>
+                <input type="text" id="city" name="city" placeholder="e.g., Mumbai" value="{{ city }}">
+            </div>
+            <button type="submit">Search</button>
+        </form>
+
+        {% if city %}
+            <h2>City: {{ city }}</h2>
+
+            {% if average_rating is not none %}
+            <div id="ratingSection">
+                <strong>Average Rating: {{ "%.2f"|format(average_rating) }}</strong>
+                <div class="rating" id="ratingStars">
+                    <span>&#9733;</span>
+                    <span>&#9733;</span>
+                    <span>&#9733;</span>
+                    <span>&#9733;</span>
+                    <span>&#9733;</span>
+                </div>
+                <script>
+                    document.addEventListener('DOMContentLoaded', function() {
+                        var avg = {{ average_rating|tojson }};
+                        if (!isNaN(avg)) {
+                            document.querySelectorAll('#ratingStars span')
+                            .forEach((star, i) => {
+                                if (i < Math.round(avg)) star.classList.add('filled');
+                            });
+                        }
+                    });
+                </script>
+            </div>
+            {% endif %}
+
+            <div class="reviews">
+                <div class="review-list">
+                    <h3>Positive Reviews</h3>
+                    <ul>
+                        {% for review in positive_reviews %}
+                            {% if review and review.strip() != '' %}
+                                <li>{{ review }}</li>
+                            {% endif %}
+                        {% else %}
+                            <li>No positive reviews available.</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+
+                <div class="review-list">
+                    <h3>Negative Reviews</h3>
+                    <ul>
+                        {% for review in negative_reviews %}
+                            {% if review and review.strip() != '' %}
+                                <li>{{ review }}</li>
+                            {% endif %}
+                        {% else %}
+                            <li>No negative reviews available.</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</body>
+</html>

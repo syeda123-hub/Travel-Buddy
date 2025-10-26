@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Review and Rating Page</title>
+<style>
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    font-family: 'Poppins', Arial, sans-serif;
+}
+
+body { font-family: Arial, sans-serif; margin: 0; padding: 0; background-image: url('{{ url_for('static', filename='images/five.jpg') }}'); background-size: contain; background-attachment: fixed; background-repeat: repeat; background-position: center; color: #333; }
+
+
+/* Container flows from bottom */
+.container {
+    max-width: 900px;
+    margin: 80px auto;
+    padding: 25px 30px;
+    background: rgba(255, 255, 255, 0.25);
+    backdrop-filter: blur(15px);
+    border-radius: 16px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.25);
+    color: #222;
+    transform: translateY(100vh);
+    opacity: 0;
+    animation: flowUp 1s ease-out forwards;
+}
+
+@keyframes flowUp {
+    0% { transform: translateY(100vh); opacity: 0; }
+    60% { transform: translateY(-20px); opacity: 1; }
+    100% { transform: translateY(0); opacity: 1; }
+}
+
+h1 {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #fff;
+    font-size: 2.2em;
+    letter-spacing: 1px;
+    text-shadow: 0 2px 5px rgba(0,0,0,0.4);
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+    color: #fff;
+    font-size: 1.1em;
+}
+
+input[type="text"], textarea {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: 8px;
+    box-sizing: border-box;
+    background: rgba(255,255,255,0.9);
+    font-size: 1em;
+}
+
+button {
+    display: block;
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: 8px;
+    background: linear-gradient(90deg, #007bff, #00c6ff);
+    color: #fff;
+    font-size: 17px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+button:hover {
+    background: linear-gradient(90deg, #00c6ff, #007bff);
+    transform: scale(1.03);
+    box-shadow: 0 0 12px rgba(0, 183, 255, 0.7);
+}
+
+/* Rating box hidden initially */
+#ratingSection, #reviewInputs {
+    display: none;
+}
+
+/* Centered highlighted rating box */
+.rating-box {
+    margin: 25px auto;
+    padding: 20px 30px;
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(10px);
+    border-radius: 16px;
+    text-align: center;
+    max-width: 400px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+    animation: fadeInScale 0.8s ease forwards;
+    opacity: 0;
+}
+
+.rating-box .city-name {
+    font-size: 1.8em;
+    font-weight: bold;
+    color: #007bff;
+    margin-bottom: 10px;
+}
+
+.rating-box .average-rating {
+    display: block;
+    font-size: 2.5em;
+    font-weight: bold;
+    color: #ff8c00;
+    margin-bottom: 10px;
+}
+
+.rating-box .rating {
+    display: flex;
+    justify-content: center;
+    gap: 5px;
+}
+
+.rating-box .rating span {
+    font-size: 30px;
+    color: #ccc;
+    transition: color 0.3s;
+}
+
+.rating-box .rating .filled {
+    color: gold; /* golden stars */
+}
+
+@keyframes fadeInScale {
+    0% { opacity: 0; transform: scale(0.8); }
+    100% { opacity: 1; transform: scale(1); }
+}
+
+/* Reviews side by side */
+#reviewInputs {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin-top: 25px;
+}
+
+.review-list {
+    flex: 1 1 45%;
+    background: rgba(255,255,255,0.85);
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: inset 0 0 10px rgba(0,0,0,0.1);
+}
+
+.review-list.positive h2 { color: #28a745; }
+.review-list.negative h2 { color: #dc3545; }
+
+.review-list ul {
+    list-style: none;
+    padding: 0;
+}
+
+.review-list li {
+    background: rgba(255,255,255,0.9);
+    padding: 10px 15px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+</style>
+</head>
+<body>
+<div class="container">
+    <h1>Review and Rating Input</h1>
+
+    <form id="cityForm" method="post" action="/combined">
+        <div class="form-group">
+            <label for="city">City</label>
+            <input type="text" id="city" name="city" placeholder="Enter the city" required>
+        </div>
+        <div class="form-group">
+            <button type="submit">Submit</button>
+        </div>
+    </form>
+
+    {% if average_rating is not none %}
+    <div id="ratingSection">
+        <div class="rating-box">
+            <div class="city-name">{{ city }}</div>
+            <span class="average-rating">{{ average_rating|round(1) }}</span>
+            <div class="rating" id="ratingStars">
+                <span>&#9733;</span>
+                <span>&#9733;</span>
+                <span>&#9733;</span>
+                <span>&#9733;</span>
+                <span>&#9733;</span>
+            </div>
+        </div>
+    </div>
+
+    <div id="reviewInputs">
+        <div class="review-list positive">
+            <h2>Positive Reviews</h2>
+            <ul>
+                {% for review in positive_reviews %}
+                    <li>{{ review }}</li>
+                {% else %}
+                    <li>No positive reviews available.</li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <div class="review-list negative">
+            <h2>Negative Reviews</h2>
+            <ul>
+                {% for review in negative_reviews %}
+                    <li>{{ review }}</li>
+                {% else %}
+                    <li>No negative reviews available.</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Show rating box and reviews
+            const ratingSection = document.getElementById('ratingSection');
+            const reviewInputs = document.getElementById('reviewInputs');
+            ratingSection.style.display = 'block';
+            reviewInputs.style.display = 'flex';
+
+            // Animate stars
+            var averageRating = {{ average_rating|tojson }};
+            if (!isNaN(averageRating)) {
+                var stars = document.querySelectorAll('#ratingStars span');
+                stars.forEach(function(star, index) {
+                    if (index < Math.round(averageRating)) {
+                        star.classList.add('filled');
+                    }
+                });
+            }
+
+            // Animate container flowing from bottom
+            const container = document.querySelector('.container');
+            container.style.transform = 'translateY(100vh)';
+            container.style.opacity = '0';
+            setTimeout(() => {
+                container.style.transition = 'transform 1s ease-out, opacity 1s ease-out';
+                container.style.transform = 'translateY(0)';
+                container.style.opacity = '1';
+            }, 50);
+        });
+    </script>
+    {% endif %}
+</div>
+</body>
+</html>
